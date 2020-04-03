@@ -28,16 +28,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ('mobile',)
 
 
-""" UserSerializer: Writable Nested Serializer as defined in the DRF documentation. That is, a serializer that uses 
-another serializer for a particular field """
-
-
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=True)
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'password', 'profile')
+        fields = ('pk', 'email', 'first_name', 'last_name', 'password', 'profile')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -62,3 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
         profile.save()
 
         return instance
+
+
+""" UserSerializer: Writable Nested Serializer as defined in the DRF documentation. That is, a serializer that uses 
+another serializer for a particular field """

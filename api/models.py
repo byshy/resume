@@ -16,7 +16,7 @@ class PreviousProject(models.Model):
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):
-        return "%s, %s" % (self.title, self.content)
+        return "{} {}".format(self.title, self.content)
 
 
 class User(AbstractUser):

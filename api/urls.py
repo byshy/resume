@@ -1,11 +1,12 @@
-from django.conf.urls import url, include
-from . import views
-
-
-pp_resource = views.PPResource()
-user_resource = views.UserResource()
+from django.urls import path, include
+from api.views import HomeRUDView, HomeAPIView, HomeListView, UserViewSet, AllUsersViewSet, GetUser
 
 urlpatterns = [
-    url(r'^v1/pp', include(pp_resource.urls)),
-    url(r'^v1/users', include(user_resource.urls)),
+    path('home/', HomeAPIView.as_view()),  # add a new project
+    path('home/all/', HomeListView.as_view()),  # get all projects
+    path('home/<int:id>', HomeRUDView.as_view()),  # id here stands for the id of the project
+    path('users/', UserViewSet.as_view()),  # get all users
+    path('users/all/', AllUsersViewSet.as_view()),  # get all users
+    path('users/<int:pk>', GetUser.as_view()),  # get a specific users
+    path('auth/', include('rest_auth.urls')),
 ]
