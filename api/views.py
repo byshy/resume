@@ -1,7 +1,8 @@
 from django.http import Http404
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from api.models import PreviousProject, User
 from api.serializers import PreviousProjectSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
@@ -12,120 +13,99 @@ class HomeListView(generics.ListAPIView):
     serializer_class = PreviousProjectSerializer
     queryset = PreviousProject.objects.all()
     permission_classes = [IsAuthenticated | ReadOnly]
+# get all previous projects
 
 
-class HomeAPIView(generics.CreateAPIView):
-    serializer_class = PreviousProjectSerializer
-
-    def post(self, request, *args, **kwargs):
-        res = self.create(request, *args, **kwargs)
-        content = {
-            'data': {
-                'id': res.data.get('id'),
-                'title': request.POST.get('title'),
-                'content': request.POST.get('content'),
-                'githubURL': request.POST.get('githubURL'),
-                'imageURL': request.POST.get('imageURL'),
-                'tags': request.POST.get('tags'),
-                'likes': request.POST.get('likes'),
-                'pub_date': request.POST.get('pub_date'),
-            },
-            'msg': 'project created successfully',
-            'status': res.status_code
-        }
-        return Response(content)
+class HomeAPIView(APIView):
+    def post(self, request):
+        serializer = PreviousProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            content = {
+                'data': serializer.data,
+                'msg': 'project created successfully',
+                'status': status.HTTP_201_CREATED
+            }
+            return Response(content)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# create a new project
 
 
-class HomeRUDView(generics.RetrieveUpdateDestroyAPIView):
-    lookup_field = 'id'
-    serializer_class = PreviousProjectSerializer
-    queryset = PreviousProject.objects.all()
+class HomeRUDView(APIView):
     permission_classes = [IsLoggedInUserOrAdmin]
 
-    def get(self, request, *args, **kwargs):
-        content = {}
+    def get_object(self, id):
         try:
-            res = self.retrieve(request, *args, **kwargs)
-            content['data'] = {
-                'id': res.data.get('id'),
-                'title': res.data.get('title'),
-                'content': res.data.get('content'),
-                'githubURL': res.data.get('githubURL'),
-                'imageURL': res.data.get('imageURL'),
-                'tags': res.data.get('tags'),
-                'likes': res.data.get('likes'),
-                'pub_date': res.data.get('pub_date'),
+            return PreviousProject.objects.get(id=id)
+        except PreviousProject.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id):
+        try:
+            pp = self.get_object(id)
+            serializer = PreviousProjectSerializer(pp)
+            content = {
+                'data': serializer.data,
+                'msg': 'element retrieved successfully',
+                'status': status.HTTP_200_OK
             }
-            content['msg'] = 'element retrieved successfully'
-            content['status'] = res.status_code
-        except Http404 as e:
-            print(e)
-            content['msg'] = 'element not found'
-            content['status'] = 404
-        return Response(content)
-
-
-class CreateUserAPIView(generics.CreateAPIView):
-    serializer_class = PreviousProjectSerializer
-
-    def post(self, request, *args, **kwargs):
-        res = self.create(request, *args, **kwargs)
-        content = {
-            'data': {
-                'id': res.data.get('id'),
-                'title': request.POST.get('title'),
-                'content': request.POST.get('content'),
-                'githubURL': request.POST.get('githubURL'),
-                'imageURL': request.POST.get('imageURL'),
-                'tags': request.POST.get('tags'),
-                'likes': request.POST.get('likes'),
-                'pub_date': request.POST.get('pub_date'),
-            },
-            'msg': 'project created successfully',
-            'status': res.status_code
-        }
-        return Response(content)
-
-
-class UserViewSet(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [AllowAny,]
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+            return Response(content)
+        except Http404:
+            return Response({'msg': 'element not found', 'status': status.HTTP_404_NOT_FOUND})
+# get a specific project
 
 
 class AllUsersViewSet(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser,]
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    permission_classes = [IsAdminUser, ]
+# get all users
 
 
-class GetUser(generics.RetrieveUpdateDestroyAPIView):
-    lookup_field = 'pk'
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    permission_classes = [IsAdminUser]
+class UserViewSet(APIView):
+    permission_classes = [AllowAny, ]
 
-    def get(self, request, *args, **kwargs):
-        content = {}
-        try:
-            res = self.retrieve(request, *args, **kwargs)
-            content['data'] = {
-                'pk': res.data.get('pk'),
-                'email': res.data.get('email'),
-                'first_name': res.data.get('first_name'),
-                'last_name': res.data.get('last_name'),
-                'mobile': res.data.get('profile')['mobile'],
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            content = {
+                'data': {
+                    'pk': serializer.data.get('pk'),
+                    'email': serializer.data.get('email'),
+                    'first_name': serializer.data.get('first_name'),
+                    'last_name': serializer.data.get('last_name'),
+                    'profile': {
+                        "mobile": serializer.data.get('profile')["mobile"]
+                    },
+                },
+                'msg': 'account created successfully',
+                'status': status.HTTP_201_CREATED
             }
-            content['msg'] = 'element retrieved successfully'
-            content['status'] = res.status_code
-        except Http404 as e:
-            print(e)
-            content['msg'] = 'element not found'
-            content['status'] = 404
-        return Response(content)
+            return Response(content)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# create a new user account
+
+
+class GetUser(APIView):
+    permission_classes = [IsAdminUser, ]
+
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        try:
+            user = self.get_object(pk)
+            serializer = UserSerializer(user)
+            content = {
+                'data': serializer.data,
+                'msg': 'element retrieved successfully',
+                'status': status.HTTP_200_OK
+            }
+            return Response(content)
+        except Http404:
+            return Response({'msg': 'element not found', 'status': status.HTTP_404_NOT_FOUND})
+# get a specific user
