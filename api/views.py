@@ -64,10 +64,11 @@ class AllUsersViewSet(generics.ListAPIView):
 # get all users
 
 
-class UserViewSet(APIView):
+class UserViewSet(generics.CreateAPIView):
+    serializer_class = UserSerializer
     permission_classes = [AllowAny, ]
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
