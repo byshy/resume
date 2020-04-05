@@ -16,8 +16,10 @@ class HomeListView(generics.ListAPIView):
 # get all previous projects
 
 
-class HomeAPIView(APIView):
-    def post(self, request):
+class HomeAPIView(generics.CreateAPIView):
+    serializer_class = PreviousProjectSerializer
+
+    def post(self, request, *args, **kwargs):
         serializer = PreviousProjectSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
