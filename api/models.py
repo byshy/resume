@@ -14,6 +14,7 @@ class PreviousProject(models.Model):
     tags = models.CharField(max_length=200)
     likes = models.IntegerField(default=0)
     pub_date = models.DateTimeField('date published')
+    # pub_date = models.DateTimeField('date published', auto_now=True)
 
     def __str__(self):
         return "{} {}".format(self.title, self.content)

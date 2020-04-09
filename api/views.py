@@ -7,12 +7,17 @@ from api.models import PreviousProject, User
 from api.serializers import PreviousProjectSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
 from api.permissions import IsLoggedInUserOrAdmin, IsAdminUser, ReadOnly
+from django.utils import timezone
 
 
 class HomeListView(generics.ListAPIView):
     serializer_class = PreviousProjectSerializer
-    queryset = PreviousProject.objects.all()
+    queryset = PreviousProject.objects.filter(
+        pub_date__lte=timezone.now()
+    )
     permission_classes = [IsAuthenticated | ReadOnly]
+
+
 # get all previous projects
 
 
@@ -30,6 +35,8 @@ class HomeAPIView(generics.CreateAPIView):
             }
             return Response(content)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 # create a new project
 
 
@@ -54,17 +61,21 @@ class HomeRUDView(APIView):
             return Response(content)
         except Http404:
             return Response({'msg': 'element not found', 'status': status.HTTP_404_NOT_FOUND})
+
+
 # get a specific project
 
 
-class AllUsersViewSet(generics.ListAPIView):
+class GetAllUsersViewSet(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser, ]
+
+
 # get all users
 
 
-class UserViewSet(generics.CreateAPIView):
+class CreateUserViewSet(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny, ]
 
@@ -87,10 +98,12 @@ class UserViewSet(generics.CreateAPIView):
             }
             return Response(content)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 # create a new user account
 
 
-class GetUser(APIView):
+class GetUserViewSet(APIView):
     permission_classes = [IsAdminUser, ]
 
     def get_object(self, pk):
@@ -110,5 +123,8 @@ class GetUser(APIView):
             }
             return Response(content)
         except Http404:
-            return Response({'msg': 'element not found', 'status': status.HTTP_404_NOT_FOUND})
+            return Response({'msg': 'element not found', 'status': status.HTTP_404_NOT_FOUND},
+                            status=status.HTTP_404_NOT_FOUND)
+
+
 # get a specific user
