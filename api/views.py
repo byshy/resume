@@ -11,6 +11,7 @@ from django.utils import timezone
 
 
 class HomeListView(generics.ListAPIView):
+    http_method_names = ['get']
     serializer_class = PreviousProjectSerializer
     queryset = PreviousProject.objects.filter(
         pub_date__lte=timezone.now()
@@ -22,6 +23,7 @@ class HomeListView(generics.ListAPIView):
 
 
 class HomeAPIView(generics.CreateAPIView):
+    http_method_names = ['post']
     serializer_class = PreviousProjectSerializer
 
     def post(self, request, *args, **kwargs):
@@ -41,6 +43,7 @@ class HomeAPIView(generics.CreateAPIView):
 
 
 class HomeRUDView(APIView):
+    http_method_names = ['get']
     permission_classes = [IsLoggedInUserOrAdmin]
 
     def get_object(self, id):
@@ -67,6 +70,7 @@ class HomeRUDView(APIView):
 
 
 class GetAllUsersViewSet(generics.ListAPIView):
+    http_method_names = ['get']
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser, ]
@@ -76,6 +80,7 @@ class GetAllUsersViewSet(generics.ListAPIView):
 
 
 class CreateUserViewSet(generics.CreateAPIView):
+    http_method_names = ['post']
     serializer_class = UserSerializer
     permission_classes = [AllowAny, ]
 
@@ -104,6 +109,7 @@ class CreateUserViewSet(generics.CreateAPIView):
 
 
 class GetUserViewSet(APIView):
+    http_method_names = ['get']
     permission_classes = [IsAdminUser, ]
 
     def get_object(self, pk):
@@ -125,6 +131,5 @@ class GetUserViewSet(APIView):
         except Http404:
             return Response({'msg': 'element not found', 'status': status.HTTP_404_NOT_FOUND},
                             status=status.HTTP_404_NOT_FOUND)
-
 
 # get a specific user
