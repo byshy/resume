@@ -7,6 +7,63 @@ from rest_framework import status
 from .models import User
 
 
+class HomeListViewTestCase(APITestCase):
+    list_projects_url = reverse("api_home:all_projects")
+
+    def test_get_all_projects(self):
+        response = self.client.get(self.list_projects_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class HomeAPIViewTestCase(APITestCase):
+    create_project_url = reverse("api_home:create_project")
+
+    data = {"title": "test title", "content": "test content", "githubURL": "asd", "imageURL": "asd",
+            "tags": "tags", "pub_date": "2020-04-02T04:31:00+03:00"}
+
+    def setUp(self):
+        self.user = User.objects.create_user(email="email@example.com",
+                                             password="some pass",
+                                             username="n")
+        self.token = Token.objects.create(user=self.user)
+        self.api_auth()
+
+    def api_auth(self):
+        self.client.login(email="email@example.com", password="some pass")
+
+    def test_create_project_logged_in(self):
+        response = self.client.post(self.create_project_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_create_project_not_logged_in(self):
+        self.client.logout()
+        response = self.client.post(self.create_project_url, self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class HomeRUDViewTestCase(APITestCase):
+    get_project_url = reverse("api_home:get_project", kwargs={'id': 1})
+
+    def setUp(self):
+        self.user = User.objects.create_user(email="email@example.com",
+                                             password="some pass",
+                                             username="n")
+        self.token = Token.objects.create(user=self.user)
+        self.api_auth()
+
+    def api_auth(self):
+        self.client.login(email="email@example.com", password="some pass")
+
+    def test_get_project_logged_in(self):
+        response = self.client.get(self.get_project_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_project_not_logged_in(self):
+        self.client.logout()
+        response = self.client.get(self.get_project_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
 class GetAllUsersViewSetTestCase(APITestCase):
     list_users_url = reverse("api_home:all_users")
 

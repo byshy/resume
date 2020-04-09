@@ -25,6 +25,7 @@ class HomeListView(generics.ListAPIView):
 class HomeAPIView(generics.CreateAPIView):
     http_method_names = ['post']
     serializer_class = PreviousProjectSerializer
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = PreviousProjectSerializer(data=request.data)
@@ -44,7 +45,7 @@ class HomeAPIView(generics.CreateAPIView):
 
 class HomeRUDView(APIView):
     http_method_names = ['get']
-    permission_classes = [IsLoggedInUserOrAdmin]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, id):
         try:
