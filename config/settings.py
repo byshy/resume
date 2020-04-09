@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import django_heroku
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -23,10 +25,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = ')g#^zxw!w!@jo@ja$wr__1*8f%#7)omq$zlt&5ppkoo6m2(kmc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['sharedcv.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'sharedcv.herokuapp.com']
 
 
 # Application definition
@@ -142,3 +144,5 @@ REST_FRAMEWORK = {
 }
 
 REST_USE_JWT = True
+
+django_heroku.settings(locals())
