@@ -26,7 +26,7 @@ SECRET_KEY = ')g#^zxw!w!@jo@ja$wr__1*8f%#7)omq$zlt&5ppkoo6m2(kmc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = False
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'sharedcv.herokuapp.com']
 
